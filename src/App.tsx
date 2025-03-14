@@ -4,14 +4,23 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 
 const createUserFormSchema = z.object({
-  name: z.string().nonempty('First name field is required.'),
-  email: z.string().nonempty('E-mail field is required.').email('Invalid e-mail format.'),
-  password: z
-    .string()
-    .nonempty('Password field is required.')
-    .min(4, 'The password must be at least 4 characters long.'),
-  country: z.string().optional(),
+  name: z.string()
+  .nonempty('First name field is required.'),
+
+  email: z.string()
+  .nonempty('E-mail field is required.')
+  .email('Invalid e-mail format.'),
+
+  password: z.string()
+  .nonempty('Password field is required.')
+  .min(4, 'The password must be at least 4 characters long.'),
+
+  country: z.string()
+  .optional(),
 });
+
+// não é possível pegar os tipos do schema só fazendo typeof, é preciso utilizar o z.infer.
+type createUserFormData = z.infer<typeof createUserFormSchema>;
 
 function App() {
   const [output, setOutput] = useState('');
@@ -20,11 +29,9 @@ function App() {
     register,
     formState: { errors },
     handleSubmit,
-  } = useForm({
+  } = useForm<createUserFormData>({
     resolver: zodResolver(createUserFormSchema),
   });
-
-  console.log(errors);
 
   const logUser = (data: any) => setOutput(JSON.stringify(data, null, 2));
 
@@ -42,7 +49,9 @@ function App() {
               <input
                 type='text'
                 {...register('name')}
-                className='text-lg outline-none border shadow w-72 h-10 px-2'
+                className={`text-lg outline-none border shadow w-[22rem] h-10 px-2 ${
+                  errors.name && 'border-2 border-red-500'
+                }`}
               />
               {errors.name && <span className='text-red-500 font-semibold break-words'>{errors.name.message}</span>}
             </div>
@@ -54,21 +63,27 @@ function App() {
               <input
                 type='email'
                 {...register('email')}
-                className='text-lg outline-none border shadow w-72 h-10 px-2'
+                className={`text-lg outline-none border shadow w-[22rem] h-10 px-2 ${
+                  errors.email && 'border-2 border-red-500'
+                }`}
               />
               {errors.email && <span className='text-red-500 font-semibold break-words'>{errors.email.message}</span>}
             </div>
 
-            <div className='flex flex-col mb-4 w-full items-center'>
+            <div className='flex flex-col mb-4'>
               <label htmlFor='password' className=' w-72 flex justify-start text-xl'>
                 Password
               </label>
               <input
                 type='password'
                 {...register('password')}
-                className='text-lg outline-none border shadow w-72 h-10 px-2'
+                className={`text-lg outline-none border shadow w-[22rem] h-10 px-2 ${
+                  errors.password && 'border-2 border-red-500'
+                }`}
               />
-              {errors.password && <span className='text-red-500 font-semibold break-words'>{errors.password.message}</span>}
+              {errors.password && (
+                <span className='text-red-500 font-semibold break-words'>{errors.password.message}</span>
+              )}
             </div>
 
             <div className='flex flex-col mb-4'>
@@ -78,7 +93,7 @@ function App() {
               <input
                 type='country'
                 {...register('country')}
-                className='text-lg outline-none border shadow w-72 h-10 px-2'
+                className='text-lg outline-none border shadow w-[22rem] h-10 px-2'
               />
             </div>
 
